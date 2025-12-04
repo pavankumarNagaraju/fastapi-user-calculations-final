@@ -1,5 +1,6 @@
 # fastapi-user-calculations
 
+
 FastAPI-based calculator service with **user registration/login** and full **BREAD** (Browse, Read, Edit, Add, Delete) operations for calculations.
 
 - **GitHub repository:**  
