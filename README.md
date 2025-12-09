@@ -1,248 +1,208 @@
-# fastapi-user-calculations
+# FastAPI User Calculations - Module 14
 
+A small FastAPI app that supports **user registration/login** and **BREAD** operations for calculations.
+This project is designed for the IS601 Module 14 requirements with:
+- REST APIs for users & calculations
+- Basic JWT-style login response (as expected by tests)
+- Simple static UI pages for E2E Playwright checks
+- Pytest markers and GitHub Actions CI
+- Docker build/push workflow
 
-FastAPI-based calculator service with **user registration/login** and full **BREAD** (Browse, Read, Edit, Add, Delete) operations for calculations.
+## Repositories
 
-- **GitHub repository:**  
-  https://github.com/pavankumarNagaraju/fastapi-user-calculations  
-
-- **GitHub Actions (CI):**  
-  https://github.com/pavankumarNagaraju/fastapi-user-calculations/actions  
-
-- **Docker Hub repository:**  
-  https://hub.docker.com/repository/docker/pavankumarnagarju/fastapi-user-calculations/general  
-
----
+- **GitHub:** https://github.com/pavankumarNagaraju/fastapi-user-calculations-m14
+- **Docker Hub:** https://hub.docker.com/repository/docker/pavankumarnagarju/
 
 ## Features
 
-### User Routes
+### Users
+- Register a new user
+- Login with existing credentials
+- Password hashing
 
-- `POST /users/register`  
-  Register a new user with:
-  - `email`
-  - `full_name`
-  - `password` (hashed before storing)
+Endpoints:
+- `POST /users/register`
+- `POST /users/login`
 
-- `POST /users/login`  
-  Validate credentials and return a success message + user ID if valid.
+### Calculations (BREAD)
+Create, Read (single & list), Edit, Delete calculations.
 
-Password hashing uses **Passlib** with `pbkdf2_sha256` for secure storage.
+Endpoints:
+- `POST /calculations/`
+- `GET /calculations/`
+- `GET /calculations/{id}`
+- `PUT /calculations/{id}`
+- `DELETE /calculations/{id}`
 
-### Calculation Routes (BREAD)
-
-`/calculations` supports full CRUD:
-
-- **Browse**: `GET /calculations/` – list all calculations  
-- **Read**: `GET /calculations/{calc_id}` – get a single calculation  
-- **Add**: `POST /calculations/` – create a calculation and compute result  
-- **Edit**: `PUT /calculations/{calc_id}` – update operands/operation and recompute  
-- **Delete**: `DELETE /calculations/{calc_id}` – remove a calculation
-
-Supported operations (case-insensitive):
-
+Supported operations:
 - `add`
-- `subtract`
-- `multiply`
-- `divide` (returns 400 on division by zero)
-
----
+- `sub`
+- `mul`
+- `div`
 
 ## Tech Stack
 
-- Python 3.12
 - FastAPI
-- SQLAlchemy ORM
-- SQLite for local development/testing
-- PostgreSQL in GitHub Actions CI
-- Passlib (`pbkdf2_sha256`) for password hashing
-- Pytest for integration tests
-- Docker & Docker Compose
-- GitHub Actions for CI/CD (tests + Docker Hub push)
+- SQLAlchemy + SQLite
+- Pydantic
+- Passlib (bcrypt)
+- Pytest
+- Playwright (E2E)
 
----
+## Project Structure (high-level)
 
-## Project Structure (simplified)
-
-```text
+```
 app/
-  ├─ main.py               # FastAPI app & router registration
-  ├─ database.py           # SessionLocal, Base, engine
-  ├─ models.py             # SQLAlchemy models (User, Calculation)
-  ├─ schemas.py            # Pydantic schemas for requests/responses
-  ├─ security.py           # Password hashing & verification
-  └─ routers/
-       ├─ users.py         # /users/register and /users/login
-       └─ calculations.py  # /calculations BREAD endpoints
-
+  main.py
+  database.py
+  models.py
+  schemas.py
+  security.py
+  dependencies.py
+  routers/
+    __init__.py
+    users.py
+    calculations.py
+  static/
+    register.html
+    login.html
 tests/
-  ├─ test_users_integration.py
-  └─ test_calculations_integration.py
-
-Dockerfile
-docker-compose.yml
-requirements.txt
 pytest.ini
-.github/workflows/python-app.yml
+.github/workflows/
+Dockerfile
 ```
 
----
-
-## Running Locally (Without Docker)
-
-### 1. Clone the repo
+## Local Setup
 
 ```bash
-git clone https://github.com/pavankumarNagaraju/fastapi-user-calculations.git
-cd fastapi-user-calculations
-```
-
-### 2. Create and activate a virtual environment (Windows PowerShell)
-
-```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
 
-### 3. Install dependencies
-
-```powershell
-python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 4. Ensure the app uses SQLite
+Run the app:
 
-By default, `app/database.py` uses:
-
-```python
-DATABASE_URL = "sqlite:///./test.db"
-```
-
-If you previously set `DATABASE_URL` in your environment (for Postgres), clear or override it in PowerShell:
-
-```powershell
-Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue
-# or explicitly:
-$env:DATABASE_URL = "sqlite:///./test.db"
-```
-
-### 5. Run the application
-
-```powershell
+```bash
 uvicorn app.main:app --reload
 ```
 
-Then open:
+The API will be available at:
+- `http://127.0.0.1:8000`
+- Swagger UI: `http://127.0.0.1:8000/docs`
 
-- Swagger UI: http://localhost:8000/docs  
-- ReDoc: http://localhost:8000/redoc  
+## Running Tests
 
-From here you can manually test user registration/login and calculation endpoints.
-
----
-
-## Running Tests Locally
-
-By default, tests are executed against a local SQLite database (`test.db`).
-
-If you have `DATABASE_URL` set, override it in your PowerShell session:
-
-```powershell
-$env:DATABASE_URL = "sqlite:///./test.db"
-```
-
-Then run:
-
-```powershell
-python -m pytest
-```
-
-The integration tests will:
-
-- Register a new user and log in.
-- Create, list, fetch, update, and delete a calculation via the API.
-
----
-
-## Running with Docker Compose
-
-The project includes a `docker-compose.yml` file that can run the FastAPI app and a Postgres service.
-
-1. Make sure Docker Desktop is running.
-
-2. From the project root, run:
-
-```powershell
-docker-compose up --build
-```
-
-3. Once the containers are up, open:
-
-```text
-http://localhost:8001/docs
-```
-
-You can test all endpoints directly from the Swagger UI inside the container.
-
----
-
-## Using the Published Docker Image (from Docker Hub)
-
-You can also run the image that is built and published by the GitHub Actions workflow:
-
-1. Pull the image:
+Non-E2E tests:
 
 ```bash
-docker pull pavankumarnagarju/fastapi-user-calculations:latest
+python -m pytest -m "not e2e"
 ```
 
-2. Run the container:
+E2E tests:
 
 ```bash
-docker run -p 8000:8000 pavankumarnagarju/fastapi-user-calculations:latest
+python -m pytest -m "e2e"
 ```
 
-3. Open the API docs:
+## E2E UI Pages
 
-```text
-http://localhost:8000/docs
+These pages are used by Playwright tests. Open in browser:
+
+- `http://127.0.0.1:8000/static/register.html`
+- `http://127.0.0.1:8000/static/login.html`
+
+They rely on `data-testid` attributes that match the tests.
+
+## BREAD Screenshots Guide (for submission)
+
+Use Swagger (`/docs`) or curl to capture screenshots.
+
+1) **Register**
+- `POST /users/register`
+```json
+{
+  "email": "screenshots_user@example.com",
+  "full_name": "Screenshots User",
+  "password": "secret123"
+}
 ```
 
----
-
-## CI/CD with GitHub Actions
-
-The CI workflow is defined in `.github/workflows/python-app.yml`.
-
-For each push to the `main` branch, it:
-
-- Checks out the repository.
-- Sets up Python and installs dependencies.
-- Starts a Postgres service and configures `DATABASE_URL`.
-- Runs pytest.
-- On success, logs in to Docker Hub using `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets.
-- Builds and pushes the image tagged as:
-
-```text
-pavankumarnagarju/fastapi-user-calculations:latest
+2) **Login**
+- `POST /users/login`
+```json
+{
+  "email": "screenshots_user@example.com",
+  "password": "secret123"
+}
 ```
 
-You can view all workflow runs at:
-
-```text
-https://github.com/pavankumarNagaraju/fastapi-user-calculations/actions
+3) **Create Calculation**
+- `POST /calculations/`
+```json
+{
+  "operation": "add",
+  "operand1": 6,
+  "operand2": 4
+}
 ```
 
----
+4) **Read All**
+- `GET /calculations/`
 
-## Links
+5) **Read One**
+- `GET /calculations/{id}`
 
-- GitHub repository:  
-  https://github.com/pavankumarNagaraju/fastapi-user-calculations
+6) **Edit**
+- `PUT /calculations/{id}`
+```json
+{
+  "operation": "mul",
+  "operand1": 6,
+  "operand2": 4
+}
+```
 
-- GitHub Actions runs:  
-  https://github.com/pavankumarNagaraju/fastapi-user-calculations/actions
+7) **Delete**
+- `DELETE /calculations/{id}`
 
-- Docker Hub repository:  
-  https://hub.docker.com/repository/docker/pavankumarnagarju/fastapi-user-calculations/general
+Tip: If you see `Unsupported operation 'string'`, update the payload to one of:
+`add`, `sub`, `mul`, `div`.
+
+## Docker
+
+Build locally:
+
+```bash
+docker build -t fastapi-user-calculations-m14 .
+docker run -p 8000:8000 fastapi-user-calculations-m14
+```
+
+If your Docker Hub image name is set to the repo name, you can pull like:
+
+```bash
+docker pull pavankumarnagarju/fastapi-user-calculations-m14:latest
+```
+
+## CI/CD Notes
+
+GitHub Actions should run:
+- Unit/integration tests on push/PR
+- E2E tests when configured
+- Docker build & push on main (if enabled)
+
+Ensure these secrets exist in your GitHub repository settings:
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+
+## Known Warnings
+
+You may see warnings related to:
+- Pydantic V2 config migration
+- `datetime.utcnow()` deprecation
+- SQLAlchemy legacy `.query().get()`
+
+These do not fail the tests and are acceptable unless your course requires cleanup.
