@@ -1,21 +1,9 @@
-# Module 14 Reflection - FastAPI User Calculations
+# Final Project Reflection – FastAPI User Calculations
 
-In Module 14, I implemented a complete FastAPI application that includes user registration/login and
-BREAD operations for calculations. This helped me connect multiple concepts from earlier modules into
-a single, testable service. I gained a clearer understanding of how routers, schemas, models,
-and a database session work together in a production-style structure.
+For the final project, I extended my Module 14 FastAPI application by adding a complete **Profile & Password Management** feature. Instead of just building new routes in isolation, I wanted the feature to touch every layer of the stack: database models, Pydantic schemas, FastAPI routers, HTML/JavaScript, automated tests, Docker, and CI. This helped me practice how a real production feature usually grows across multiple files and concerns.
 
-One of the biggest learning points was aligning my implementation with automated tests.
-The integration tests reinforced the importance of consistent response formats, correct status codes,
-and predictable behavior across the API. I also learned how small mismatches between schemas and models
-can break the application at runtime, which encouraged me to validate my design carefully.
+On the backend, I created a new `/profile` router that lets a user load their profile, update their email or full name, and change their password. All of these actions require the current password, which is validated against the bcrypt hash stored in the database. Implementing this reminded me why security has to be built into the design from the beginning. It also reinforced how SQLAlchemy sessions, models, and Pydantic schemas fit together to safely update a single `User` row without breaking other parts of the application.
 
-The Playwright E2E portion was especially valuable. It required me to ensure the static UI pages
-used stable selectors (`data-testid`) and displayed clear success/error messages.
-This highlighted the relationship between front-end validation and backend error handling.
-It also reminded me that good UX is testable when the UI is designed with clarity and consistency.
+I also wrote new **integration tests** and **Playwright E2E tests** that follow the full flow: create a known user, read the profile, update the profile, rotate the password, and verify the old password no longer works. These tests showed me how valuable it is to automate not just happy paths but also transitions, like “old credentials fail, new credentials succeed.” Because the tests cover both the API and the browser UI, I had to be careful with response messages, field IDs, and error handling so everything stayed consistent end-to-end.
 
-Finally, setting up CI and Docker strengthened my DevOps workflow. Automating tests through GitHub Actions
-and preparing the project for container deployment gave me more confidence in building applications that are
-reproducible and easy to deploy. Overall, this module improved my ability to deliver a full-stack,
-test-driven FastAPI project with a clean structure and reliable automation.
+Finally, I verified that the new feature still works with my existing **Docker** and **GitHub Actions** setup. The CI pipeline installs dependencies, runs all tests (including Playwright), builds the Docker image, and pushes it to Docker Hub when the branch is healthy. Seeing the entire workflow succeed—with the new profile functionality included—gave me confidence that I can add meaningful features to a Python/FastAPI codebase while respecting testing, security, and DevOps practices. Overall, this final project tied together many course learning outcomes: REST APIs, SQL databases, JSON validation with Pydantic, authentication and hashing, automated testing, CI/CD, and containerization.
