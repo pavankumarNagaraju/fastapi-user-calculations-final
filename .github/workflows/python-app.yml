@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-user-calculations-m14:latest
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-user-calculations-final:latest
 
     steps:
       - name: Checkout repository
